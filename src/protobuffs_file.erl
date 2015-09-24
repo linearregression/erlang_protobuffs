@@ -10,11 +10,19 @@
 -export([open/2,path_open/3,close/1,format/3,request/1,compile_forms/2,write_file/2]).
 
 open(File, Options) ->
-    file:open(File,Options).
+    case catch file:open(File,Options) of
+         {ok, InFile} -> {ok, InFile};
+         {error, Reason} -> {error, {File, Reason}};
+         Else -> Else
+    end.
 
 path_open(Path, File, Modes) ->
-    file:path_open(Path, File, Modes).
-
+    case catch file:path_open(Path, File, Modes) of
+         {ok, Path} -> {ok, Path};
+         {error, Reason} -> {error, {path, Path, file, File, Reason}};
+         Else-> Else
+    end.
+ 
 close(FileRef) ->
     file:close(FileRef).
 
