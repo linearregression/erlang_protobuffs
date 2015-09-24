@@ -11,18 +11,18 @@ endif
 REBAR_URL = https://s3.amazonaws.com/rebar3/rebar3
 REPO=protobuffs
 
-all: compile
-
+all: $(REBAR)
+	@$(REBAR) compile
 
 compile:
 	@$(REBAR) compile
 
 ct:
 	./scripts/generate_emakefile.escript
-	@$(REBAR) skip_deps=true ct
+	@$(REBAR) as test ct
 
 eunit:
-	@$(REBAR) skip_deps=true eunit
+	@$(REBAR) as test eunit
 
 test: eunit ct
 
