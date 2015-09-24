@@ -1,10 +1,17 @@
+.rebar3
+_*
 ebin
 *.beam
 *.gz
 *~
+*.swp
+*.swo
+*.*~
+*~
 doc
 logs
 deps
+_build
 .eunit
 .directory
 src/protobuffs_parser.erl
