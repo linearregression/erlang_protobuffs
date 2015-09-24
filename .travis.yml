@@ -16,4 +16,4 @@ otp_release:
 
 branches:
         only:
-              - master
+              - develop
