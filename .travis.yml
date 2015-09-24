@@ -1,4 +1,4 @@
-sudo: false
+
 language: erlang
 script: make all test
 
