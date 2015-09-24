@@ -47,3 +47,5 @@ dialyzer: compile
 $(REBAR):
 	curl -Lo rebar3 $(REBAR_URL) || wget $(REBAR_URL)
 	chmod a+x rebar3
+
+rebar: $(REBAR)
