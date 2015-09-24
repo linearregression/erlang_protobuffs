@@ -1,9 +1,18 @@
-REBAR=`which rebar || printf ./rebar`
-REPO=protobuffs
-all: get-deps compile
+# If there is a rebar in the current directory, use it
+ifeq ($(wildcard rebar3),rebar3)
+REBAR = $(CURDIR)/rebar3
+endif
 
-get-deps:
-	@$(REBAR) get-deps
+# And finally, prep to download rebar if all else fails
+ifeq ($(REBAR),)
+REBAR = $(CURDIR)/rebar3
+endif
+
+REBAR_URL = https://s3.amazonaws.com/rebar3/rebar3
+REPO=protobuffs
+
+all: compile
+
 
 compile:
 	@$(REBAR) compile
@@ -34,3 +43,7 @@ build_plt: compile
 
 dialyzer: compile
 	dialyzer -Wno_return --plt $(COMBO_PLT) ebin
+
+$(REBAR):
+	curl -Lo rebar3 $(REBAR_URL) || wget $(REBAR_URL)
+	chmod a+x rebar3
