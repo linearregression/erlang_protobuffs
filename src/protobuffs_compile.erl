@@ -142,7 +142,7 @@ output(Basename, MessagesRaw, RawEnums, Options) ->
     error_logger:info_msg("Writing header file to ~p~n",[HeaderFile]),
     ok = write_header_include_file(HeaderFile, Messages),
     PokemonBeamFile = code:where_is_file("pokemon_pb.beam"),
-    {ok,{_,[{abstract_code,{_,Forms}}]}} = beam_lib:chunks(PokemonBeamFile, [abstract_code]),
+    {ok,{_,[{abstract_code,{_,Forms}}]}} = parse_beam(PokemonBeamFile, abstract_code),
     Forms1 = filter_forms(Messages, Enums, Forms, Basename, []),
     {ok, _, Bytes, _Warnings} = protobuffs_file:compile_forms(Forms1, proplists:get_value(compile_flags,Options,[])),
     BeamFile = case proplists:get_value(output_ebin_dir,Options) of
@@ -165,8 +165,9 @@ output_source(Basename, MessagesRaw, Enums, Options) ->
     end,
     error_logger:info_msg("Writing header file to ~p~n",[HeaderFile]),
     ok = write_header_include_file(HeaderFile, Messages),
-    PokemonBeamFile = filename:dirname(code:which(?MODULE)) ++ "/pokemon_pb.beam",
-    {ok,{_,[{abstract_code,{_,Forms}}]}} = beam_lib:chunks(PokemonBeamFile, [abstract_code]),
+    Dir = filename:absname(code:which(?MODULE)),
+    PokemonBeamFile = Dir ++ "/pokemon_pb.beam",
+    {ok,{_,[{abstract_code,{_,Forms}}]}} = parse_beam(PokemonBeamFile, abstract_code),
     Forms1 = filter_forms(Messages, Enums, Forms, Basename, []),
     SrcFile = case proplists:get_value(output_src_dir,Options) of
     undefined ->
@@ -185,12 +186,19 @@ parse_file(FileName) ->
     {ok,String}.
 
 %% @hidden
+parse_beam(PokemonBeamFile, ChunkRefs) ->
+    case catch beam_lib:chunks(PokemonBeamFile, [ChunkRefs]) of
+        {ok, Result}  -> {ok, Result}; 
+        {error, Reason} -> {error, {PokemonBeamFile, Reason}};
+        Else -> Else
+    end.
+
 parse_file(InFile,Acc) ->
     case protobuffs_file:request(InFile) of
         {ok,Token,_EndLine} ->
             parse_file(InFile,Acc ++ [Token]);
         {error,token} ->
-            exit(scanning_error);
+            exit({InFile, scanning_error});
         {eof,_} ->
             Acc
     end.

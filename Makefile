@@ -11,6 +11,8 @@ endif
 REBAR_URL = https://s3.amazonaws.com/rebar3/rebar3
 REPO=protobuffs
 
+has_eqc := $(shell erl -eval 'try eqc:version(), io:format("true") catch _:_ -> io:format(false) end' -noshell -s init stop)
+
 all: $(REBAR)
 	@$(REBAR) compile
 
@@ -28,6 +30,16 @@ test: eunit ct
 
 clean:
 	@$(REBAR) clean
+
+# Full clean and removal of all build artifacts. Remove deps first to avoid
+# wasted effort of cleaning deps before nuking them.
+distclean: clean
+	@rm -rf _build log .rebar ebin/ $(PROJ).plt
+	@find . -name erl_crash.dump -type f -delete
+
+testclean:
+	@find log/ct -maxdepth 1 -name ct_run* -type d -cmin +360 -exec rm -fr {} \;
+	@find test/*.beam -maxdepth 3 -exec rm -fr {} \;
 
 APPS = kernel stdlib sasl erts ssl tools os_mon runtime_tools crypto inets \
 	xmerl webtool snmp public_key mnesia eunit syntax_tools compiler

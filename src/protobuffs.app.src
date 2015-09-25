@@ -3,6 +3,14 @@
     { vsn, git },
     { registered, [] },
     { applications, [kernel,stdlib] },
+    { modules, [
+                protobuffs_compile,
+                protobuffs_file,
+                protobuffs_scanner,
+                pokemon_pb,
+                protobuffs,
+                protobuffs_parser
+]},
     { env, [] }
   ]
 }.
